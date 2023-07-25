@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.6.3 FATAL_ERROR)
 cmake_policy(VERSION 3.6.3)
 find_package(ControllerSDK REQUIRED)
 find_package(SpdLog REQUIRED)
+find_package(Stb REQUIRED)
+find_package(LibYUV REQUIRED)
 set(EXECUTABLE_NAME GameDemo)
 
 set(EXECUTABLE_SRCS
@@ -17,6 +19,8 @@ include_directories(
   # for audio/pixel format
   PRIVATE ${ControllerSDK_INCLUDE_DIRS}
   PRIVATE ${SPDLOG_INCLUDE_DIRS}
+  PRIVATE ${STB_INCLUDE_DIRS}
+  PRIVATE ${LIBYUV_INCLUDE_DIRS}
 )
 
 add_executable(${EXECUTABLE_NAME}
@@ -26,6 +30,7 @@ add_executable(${EXECUTABLE_NAME}
 target_link_libraries(${EXECUTABLE_NAME}
   base
   ${ControllerSDK_LIBRARIES}
+  ${LIBYUV_LIBRARIES}
 )
 
 if(WIN32)

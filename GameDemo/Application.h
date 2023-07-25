@@ -47,9 +47,11 @@ public:
 public:
   void CreateGameWindow();
   void GetWindowPixels();
+  void DumpImage(int32_t width, int32_t height, const char* buf, int32_t bufSize);
 
 private:
-  uint16_t m_thrifPort { 0 };
+  uint32_t m_thrifPort {0};
+  uint32_t m_thrifListenPort {0};
   std::string m_jobId;
   std::unique_ptr<std::thread> m_gameRenderThread;
   std::atomic<bool> m_exitFlag;

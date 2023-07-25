@@ -13,6 +13,12 @@
 #include "DxTextureAdapter.h"
 #endif
 #include "winuser.h"
+#include "libyuv.h"
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 std::string GetLogSuffix()
 {
@@ -56,7 +62,7 @@ Application::~Application()
 int Application::Init(int argc, char** argv)
 {
   /* 可以通过启动参数来获取端口
-   * 启动参数样例: --cpp_appid=67 --cpp_port=4760
+   * 启动参数样例: --cpp_appid=67 --cpp_port=4760 --cpp_listen_port=10900
    * --cpp_jobid=local_67-20230718194817278-1099531783474-17244
    * --cpp_stream_uuid=67-20230718194730305-1099531783474-fish-local-32080-metashell-primary-out
    * --cpp_stream_uuids=eyJjcHBfc3RyZWFtX3V1aWRzIjpbIjY3LTIwMjMwNzE4MTk0NzMwMzA1LTEwOTk1MzE3ODM0NzQtZmlzaC1sb2NhbC0zMjA4MC1tZXRhc2hlbGwtcHJpbWFyeS1vdXQiXX0=
@@ -74,6 +80,14 @@ int Application::Init(int argc, char** argv)
     cppPort = "0";
   }
   m_thrifPort = std::stoll(cppPort);
+
+  std::string cppListenPort = cpp::GetEnvVar("CPP_LISTEN_PORT");  // 对应启动参数--cpp_listen_port
+  if (cppListenPort.empty()) 
+  {
+    // 如果环境变量获取的端口为空，则赋为0
+    cppListenPort = "0";
+  }
+  m_thrifListenPort = std::stoll(cppListenPort);
 
   m_jobId = cpp::GetEnvVar("CPP_JOB_ID");//对应启动参数--cpp_jobid
   std::string logDir = cpp::GetEnvVar("LOCAL_LOG_DIR");//对应启动参数--local_log_dir
@@ -108,11 +122,11 @@ int Application::Init(int argc, char** argv)
   m_logger->flush_on(spdlog::level::info);
   spdlog::register_logger(m_logger);
 
-  m_logger->info("GameDemo start thrifPort:{}, jobId:{}, local_log_dir:{}", m_thrifPort, m_jobId, logPath.u8string());
+  m_logger->info("GameDemo start thrifPort:{}, thrifListenPort:{}, jobId:{}, local_log_dir:{}", m_thrifPort, m_thrifListenPort, m_jobId, logPath.u8string());
 
   // 初始化SDK, SDK的日志目录也必须设为启动参数或环境变量所指定的目录local_log_dir
   // 注意：enableDumpCapture填true会启用sdk的崩溃捕获能力，会让游戏自带的崩溃捕获失效
-  auto err = cpp_context_init3(m_thrifPort, m_jobId.c_str(), logPath.u8string().c_str(), 0, false);
+  auto err = cpp_context_init3(m_thrifPort, m_jobId.c_str(), logPath.u8string().c_str(), m_thrifListenPort, false);
   if (err != 0)
   {
     m_logger->error("cpp_context_init err: {}", err);
@@ -185,7 +199,7 @@ void Application::OnRecvCustomData(const std::string& customData)
   }
   if (!m_gameRenderThread) {
     SendBizMsg("UpdateAnchorLayer", BuildUpdateAnchorLayer());
-    SendBizMsg("SendMessageToApplet", BuildSendMessageToApplet("i am come from game"));
+    SendBizMsg("SendMessageToApplet", BuildSendMessageToApplet("this is game msg"));
     m_gameRenderThread = std::make_unique<std::thread>(&Application::GameRenderLoop, this);
   }
 }
@@ -195,11 +209,17 @@ void Application::GameRenderLoop()
   //模拟游戏30fps发送图像数据
   while (!m_exitFlag.load())
   {
-    std::string videoBuf;
+    std::string videoBuf {0};
     {
       std::lock_guard<std::mutex> l(m_videoBufMutex);
       videoBuf.swap(m_videoBuf);
     }
+
+    if (videoBuf.size() < m_wndClientWidth * m_wndClientHeight * 4) 
+    {
+      continue;
+    }
+
     //模拟创建一个游戏纹理
     static std::shared_ptr<DxTextureAdapter> nativeAdapter = nullptr;
     static ID3D11Texture2D* pTexture = nullptr;//
@@ -230,9 +250,9 @@ void Application::GameRenderLoop()
     cpp_raw_video_frame video_frame;
     video_frame.width = m_wndClientWidth;
     video_frame.height = m_wndClientHeight;
-    video_frame.lineSize = videoBuf.size();
+    video_frame.lineSize = m_wndClientWidth * 4;
     video_frame.pixelData = videoBuf.data();
-    video_frame.pixelFormat = kPixel_Format_BGRA;
+    video_frame.pixelFormat = kPixel_Format_RGBA;
     video_frame.fps = 30;
     cpp_pipeline_share_raw_jce(m_streamName.c_str(), &video_frame, nullptr, 0, nullptr);
     //3、发送共享纹理句柄
@@ -376,9 +396,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
   static UINT_PTR timerId;
 
   switch (message) {
-    case WM_CREATE:
-      timerId = SetTimer(hWnd, 1, 10, nullptr);  // 设置定时器，每1000毫秒触发一次
-      break;
+    case WM_CREATE: 
+    {
+      timerId = SetTimer(hWnd, 1, 10, nullptr);  // 设置定时器，每10毫秒触发一次
+      LONG style = GetWindowLong(hWnd, GWL_STYLE);
+      style &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+      SetWindowLong(hWnd, GWL_STYLE, style);
+    } break;
     case WM_TIMER:
       InvalidateRect(hWnd, nullptr, TRUE);  // 请求窗口重绘
       break;
@@ -403,15 +427,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
       DeleteObject(hBrush);
 
       EndPaint(hWnd, &ps);
-
       //获取窗口像素
       Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
       context->GetWindowPixels();
     } break;
     case WM_DESTROY:
+    {
+      Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+      context->SendBizMsg("SendMessageToApplet", context->BuildSendMessageToApplet("GameExit"));
       KillTimer(hWnd, timerId);  // 销毁定时器
       PostQuitMessage(0);
-      break;
+    } break;
     default:
       return DefWindowProc(hWnd, message, wParam, lParam);
   }
@@ -481,14 +507,47 @@ void Application::GetWindowPixels() {
   bmi.bmiHeader.biCompression = BI_RGB;
 
   size_t imageSize = width * height * 4;
+
+  static std::string glb_tmpBuf;
+  if (glb_tmpBuf.size() != width * height * 4) {
+    glb_tmpBuf.resize(width * height * 4, 0);
+  }
+  GetDIBits(hMemoryDC, hBitmap, 0, height, &glb_tmpBuf[0], &bmi, DIB_RGB_COLORS);
   {
     std::lock_guard<std::mutex> l(m_videoBufMutex);
-    m_videoBuf.resize(imageSize);
-    GetDIBits(hMemoryDC, hBitmap, 0, height, &m_videoBuf[0], &bmi, DIB_RGB_COLORS);
+    if (m_videoBuf.size() != glb_tmpBuf.size()) {
+      m_videoBuf.resize(glb_tmpBuf.size(), 0);
+    }
+
+    libyuv::ARGBToABGR((uint8_t*)glb_tmpBuf.data(), width * 4, (uint8_t*)m_videoBuf.data(), width * 4, width, height);
+    // 将 alpha 通道设置为不透明
+    for (size_t i = 0; i < width * height; i++) {
+        size_t offset = i * 4;
+        m_videoBuf[offset + 3] = 255;
+    }
+    DumpImage(width, height, m_videoBuf.data(), width * 4);
   }
 
   SelectObject(hMemoryDC, hOldBitmap);
   DeleteObject(hBitmap);
   DeleteDC(hMemoryDC);
   ReleaseDC(m_hwnd, hWindowDC);
+}
+
+void Application::DumpImage(int32_t width, int32_t height, const char* buf, int32_t bufSize) 
+{
+  fs::path currentPath = fs::current_path();
+  fs::path flagFile = currentPath.append("dump_image");
+  if (!fs::exists(flagFile))
+    return;
+
+  static int64_t glb_image_frame = 0;
+  std::string imageName = R"(dump_image_)";
+  imageName = imageName.append(std::to_string(glb_image_frame));
+  imageName = imageName.append(R"(.png)");
+  fs::path targetPath = currentPath.append(imageName);
+  if (glb_image_frame++ % 100 == 0) 
+  {
+    stbi_write_png(targetPath.u8string().c_str(), width, height, 4, buf, width * 4);
+  }
 }

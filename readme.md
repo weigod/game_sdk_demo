@@ -5,13 +5,13 @@
 
 ## 2 运行平台
 * PC Windows环境 64bit 编译环境: cmake3.63+、vs2017+
-* 体验Demo:复制thirdparty/ControllerSDK/bin/win64的所有文件bin目录，运行GameDemo.exe
+* 体验Demo:复制thirdparty/ControllerSDK/bin/win64的所有依赖文件到bin目录，运行GameDemo.exe
 
 ## 3 基础玩法
 ### 3.1 初始化环境参数
-* 通过启动参数或环境变量获取cpp_jobid、cpp_port、local_log_dir等必要参数
+* 通过启动参数或环境变量获取cpp_jobid、cpp_port、cpp_listen_port、local_log_dir等必要参数
 ### 3.2 初始化SDK
-* 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, 0, false); 完成初始化
+* 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化
 * 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率
 * 调用cpp_set_channel_msg_cb注册回调, 用于监听小程序和主播端的消息
 ### 3.3 采集游戏图像发送
