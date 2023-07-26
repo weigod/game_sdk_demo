@@ -16,6 +16,7 @@
 * 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化
 * 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率
 * 调用cpp_set_channel_msg_cb注册回调, 用于监听小程序和主播端的消息
+* SDK接口参数请参照thirdparty/ControllerSDK/include/ControllerAPI.h
 ### 3.3 采集游戏图像发送
 * 生成一个流名（可自定义唯一即可），调用UpdateAnchorLayer绑定流名和图层名
 * 调用sdk发送流接口发送游戏图像，支持三种数据发送:
