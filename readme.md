@@ -3,7 +3,9 @@
 ## 1 游戏类型
 * 不限引擎类型，支持UE4、Unity、Cocos、自研等多引擎
 * Demo展示
-![示例图片](demo.jpg)
+![示例图片](image/demo.jpg)
+* 小程序版本配置勾选"自动发布OBS"即支持OBS环境
+![示例图片](image/obs.jpg)
 
 ## 2 运行平台
 * PC Windows环境 64bit 编译环境: cmake3.63+、vs2017+
