@@ -45,9 +45,14 @@ public:
   int ParseMessage(std::string jsonStr);
 
 public:
-  void CreateGameWindow();
+  void CreateHostWindow();
+  void CreateGameWindow(HWND parent_hwnd);
+  void CreateControlWindow(HWND parent_hwnd);
   void GetWindowPixels();
   void DumpImage(int32_t width, int32_t height, const char* buf, int32_t bufSize);
+  void SendEditCustomMsg();
+  void UpdateRecvEditMsg(const std::string& msg);
+  void UpdateRecvEdit(const std::string& msg);
 
 private:
   uint32_t m_thrifPort {0};
@@ -59,7 +64,10 @@ private:
   int32_t m_resolutionWidth = 1920;
   int32_t m_resolutionHeight = 1080;
 
-  HWND m_hwnd;
+  HWND m_game_hwnd;
+  HWND m_host_hwnd;
+  HWND m_send_edit_hwnd;
+  HWND m_recv_edit_hwnd;
   int32_t m_wndClientWidth = 1280;
   int32_t m_wndClientHeight = 720;
   std::string m_videoBuf;

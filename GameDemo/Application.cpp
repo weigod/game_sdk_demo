@@ -19,6 +19,7 @@
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#include "string_utils.h"
 
 std::string GetLogSuffix()
 {
@@ -39,6 +40,9 @@ std::string GetLogSuffix()
 
   return s.str();
 }
+
+#define SEND_MSG_BTN_ID 10001
+#define WM_RECV_UPDATE_MSG (WM_USER + 100)
 
 ////////////////////////////////////////////////////////////////////////
 Application::Application()
@@ -154,7 +158,7 @@ int Application::Init(int argc, char** argv)
     context->ParseMessage(message);
   }, this);
 
-  CreateGameWindow();
+  CreateHostWindow();
   return 0;
 }
 
@@ -199,7 +203,6 @@ void Application::OnRecvCustomData(const std::string& customData)
   }
   if (!m_gameRenderThread) {
     SendBizMsg("UpdateAnchorLayer", BuildUpdateAnchorLayer());
-    SendBizMsg("SendMessageToApplet", BuildSendMessageToApplet("this is game msg"));
     m_gameRenderThread = std::make_unique<std::thread>(&Application::GameRenderLoop, this);
   }
 }
@@ -360,10 +363,9 @@ int Application::ParseMessage(std::string jsonStr)
 
   if (eventName == "OnAppletMessage") //小程序发过来的消息
   {
-    if (messageObj.contains("msg")) {
-      auto msg = messageObj["msg"].get<std::string>();
-      m_logger->info("OnAppletMessage msg:{}", msg);
-    }
+    auto msg = messageObj.get<std::string>();
+    m_logger->info("OnAppletMessage msg:{}", msg);
+    UpdateRecvEditMsg(msg);
   } 
   else if (eventName == "OnAnchorCanvasChange") //主播端的画布改变的消息
   {
@@ -392,9 +394,36 @@ int Application::ParseMessage(std::string jsonStr)
   return 0;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-  static UINT_PTR timerId;
+static UINT_PTR timerId;
+LRESULT CALLBACK HostWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+  switch (message) {
+  case WM_COMMAND: {
+    if (LOWORD(wParam) == SEND_MSG_BTN_ID) {
+      Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+      context->SendEditCustomMsg();
+    }
+  } break;
+  case WM_RECV_UPDATE_MSG: {
+    Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    std::string* msg_str = (std::string*)lParam;
+    if (msg_str) {
+      context->UpdateRecvEdit(*msg_str);
+      delete msg_str;
+    }
+  } break;
+  case WM_DESTROY: {
+    Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    context->SendBizMsg("SendMessageToApplet", context->BuildSendMessageToApplet("GameExit"));
+    KillTimer(hWnd, timerId);  // 销毁定时器
+    PostQuitMessage(0);
+  } break;
+  default:
+    return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+  return 0;
+}
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
     case WM_CREATE: 
     {
@@ -431,22 +460,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
       Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
       context->GetWindowPixels();
     } break;
-    case WM_DESTROY:
-    {
-      Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-      context->SendBizMsg("SendMessageToApplet", context->BuildSendMessageToApplet("GameExit"));
-      KillTimer(hWnd, timerId);  // 销毁定时器
-      PostQuitMessage(0);
-    } break;
     default:
       return DefWindowProc(hWnd, message, wParam, lParam);
   }
   return 0;
 }
 
-void Application::CreateGameWindow() {
+void Application::CreateGameWindow(HWND parent_hwnd) {
   WNDCLASSEXW wcex;
-
   wcex.cbSize = sizeof(WNDCLASSEXW);
   wcex.style = CS_HREDRAW | CS_VREDRAW;
   wcex.lpfnWndProc = WndProc;
@@ -464,7 +485,7 @@ void Application::CreateGameWindow() {
 
   int clientWidth = m_wndClientWidth;
   int clientHeight = m_wndClientHeight;
-  DWORD style = WS_OVERLAPPEDWINDOW;
+  DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
   RECT windowRect = {0, 0, clientWidth, clientHeight};
   AdjustWindowRect(&windowRect, style, FALSE);
@@ -472,26 +493,78 @@ void Application::CreateGameWindow() {
   int windowWidth = windowRect.right - windowRect.left;
   int windowHeight = windowRect.bottom - windowRect.top;
 
-  m_hwnd = CreateWindowW(L"Dummy_Unity_Class", L"Dummy_Unity", style,
-                       CW_USEDEFAULT, 0, windowWidth, windowHeight, nullptr,
+  m_game_hwnd = CreateWindowW(L"Dummy_Unity_Class", L"Dummy_Unity", style,
+                       CW_USEDEFAULT, 0, windowWidth, windowHeight, parent_hwnd,
                        nullptr, GetModuleHandleW(nullptr), nullptr);
-  SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
-  ShowWindow(m_hwnd, SW_SHOW);
-  UpdateWindow(m_hwnd);
+  SetWindowLongPtr(m_game_hwnd, GWLP_USERDATA, (LONG_PTR)this);
+}
+
+void Application::CreateHostWindow() {
+  WNDCLASSEXW wcex;
+  wcex.cbSize = sizeof(WNDCLASSEXW);
+  wcex.style = CS_HREDRAW | CS_VREDRAW;
+  wcex.lpfnWndProc = HostWndProc;
+  wcex.cbClsExtra = 0;
+  wcex.cbWndExtra = 0;
+  wcex.hInstance = GetModuleHandleW(nullptr);
+  wcex.hIcon = NULL;
+  wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+  wcex.lpszMenuName = NULL;
+  wcex.lpszClassName = L"Dummy_Host_Class";
+  wcex.hIconSm = NULL;
+
+  RegisterClassExW(&wcex);
+  m_host_hwnd = CreateWindowW(L"Dummy_Host_Class", L"DummyGame", WS_OVERLAPPEDWINDOW & ~(WS_THICKFRAME | WS_MAXIMIZEBOX),
+    CW_USEDEFAULT, CW_USEDEFAULT, 1600, 780, nullptr,
+    nullptr, GetModuleHandleW(nullptr), nullptr);
+  SetWindowLongPtr(m_host_hwnd, GWLP_USERDATA, (LONG_PTR)this);
+
+  CreateGameWindow(m_host_hwnd);
+  CreateControlWindow(m_host_hwnd);
+
+  ShowWindow(m_host_hwnd, SW_SHOW);
+  UpdateWindow(m_host_hwnd);
+}
+
+void Application::CreateControlWindow(HWND parent_hwnd) {
+  DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+  RECT game_rect;
+  ::GetClientRect(m_game_hwnd, &game_rect);
+  LONG pos_x = game_rect.right + 10;
+  LONG pos_y = game_rect.top + 40;
+  CreateWindowW(L"Button", L"发送消息到小程序", style,
+    pos_x, pos_y, 140, 40, parent_hwnd, (HMENU)SEND_MSG_BTN_ID, nullptr, nullptr);
+
+  pos_y += 50;
+  CreateWindowW(L"Static", L"待发送到小程序的消息", style,
+    pos_x, pos_y, 160, 20, parent_hwnd, nullptr, nullptr, nullptr);
+
+  pos_y += 20;
+  m_send_edit_hwnd = CreateWindowW(L"Edit", L"消息内容123", style | WS_VSCROLL | WS_BORDER | ES_MULTILINE,
+    pos_x, pos_y, 280, 200, parent_hwnd, nullptr, nullptr, nullptr);
+
+  pos_y += 220;
+  CreateWindowW(L"Static", L"接收到小程序的消息", style,
+    pos_x, pos_y, 160, 20, parent_hwnd, nullptr, nullptr, nullptr);
+
+  pos_y += 20;
+  m_recv_edit_hwnd = CreateWindowW(L"Edit", L"", style | WS_VSCROLL | WS_BORDER | ES_MULTILINE | ES_READONLY,
+    pos_x, pos_y, 280, 200, parent_hwnd, nullptr, nullptr, nullptr);
 }
 
 void Application::GetWindowPixels() {
-  if (!IsWindow(m_hwnd)) {
+  if (!IsWindow(m_game_hwnd)) {
     m_logger->info("Invalid window handle");
     return;
   }
 
   RECT rect;
-  GetClientRect(m_hwnd, &rect);
+  GetClientRect(m_game_hwnd, &rect);
   int width = rect.right - rect.left;
   int height = rect.bottom - rect.top;
 
-  HDC hWindowDC = GetDC(m_hwnd);
+  HDC hWindowDC = GetDC(m_game_hwnd);
   HDC hMemoryDC = CreateCompatibleDC(hWindowDC);
   HBITMAP hBitmap = CreateCompatibleBitmap(hWindowDC, width, height);
   HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hBitmap));
@@ -531,7 +604,7 @@ void Application::GetWindowPixels() {
   SelectObject(hMemoryDC, hOldBitmap);
   DeleteObject(hBitmap);
   DeleteDC(hMemoryDC);
-  ReleaseDC(m_hwnd, hWindowDC);
+  ReleaseDC(m_game_hwnd, hWindowDC);
 }
 
 void Application::DumpImage(int32_t width, int32_t height, const char* buf, int32_t bufSize) 
@@ -550,4 +623,21 @@ void Application::DumpImage(int32_t width, int32_t height, const char* buf, int3
   {
     stbi_write_png(targetPath.u8string().c_str(), width, height, 4, buf, width * 4);
   }
+}
+
+void Application::SendEditCustomMsg() {
+  wchar_t edit_wstr[1024]{0};
+  ::GetWindowText(m_send_edit_hwnd, edit_wstr, _countof(edit_wstr));
+  auto edit_utf8_str = rtc::ToUtf8(edit_wstr);
+  SendBizMsg("SendMessageToApplet", BuildSendMessageToApplet(edit_utf8_str));
+}
+
+void Application::UpdateRecvEditMsg(const std::string& msg) {
+  auto msg_str = new std::string(msg);
+  ::PostMessage(m_host_hwnd, WM_RECV_UPDATE_MSG, 0, (LPARAM)msg_str);
+}
+
+void Application::UpdateRecvEdit(const std::string& msg) {
+  std::wstring msg_wstr = rtc::ToUtf16(msg.c_str());
+  ::SetWindowText(m_recv_edit_hwnd, msg_wstr.c_str());
 }
