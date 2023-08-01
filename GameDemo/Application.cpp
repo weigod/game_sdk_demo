@@ -66,13 +66,13 @@ Application::~Application()
 int Application::Init(int argc, char** argv)
 {
   /* 可以通过启动参数来获取端口
-   * 启动参数样例: --cpp_appid=67 --cpp_port=4760 --cpp_listen_port=10900
+   * 启动参数样例: --cpp_appid=67 --cpp_port=4760 --cpp_listen_port=0
    * --cpp_jobid=local_67-20230718194817278-1099531783474-17244
    * --cpp_stream_uuid=67-20230718194730305-1099531783474-fish-local-32080-metashell-primary-out
    * --cpp_stream_uuids=eyJjcHBfc3RyZWFtX3V1aWRzIjpbIjY3LTIwMjMwNzE4MTk0NzMwMzA1LTEwOTk1MzE3ODM0NzQtZmlzaC1sb2NhbC0zMjA4MC1tZXRhc2hlbGwtcHJpbWFyeS1vdXQiXX0=
    * --cpp_stream_uid=1099531783474 --cpp_program_name=virtual_metaroom
    * --cpp_pid=17244
-   * --local_log_dir="C:\Users\Administrator\AppData\Roaming\HuyaPcPresenter\presenter\log\0718\194715_390\metashell"
+   * --local_log_dir="C:\Users\Administrator\AppData\Roaming\huyaPcPresenter\presenter\log\0801\153902_478\metashell\59ku7pqm\2023-08-01 15-39-23-219"
    * 字符编码为utf8
    */
 
@@ -85,7 +85,7 @@ int Application::Init(int argc, char** argv)
   }
   m_thrifPort = std::stoll(cppPort);
 
-  std::string cppListenPort = cpp::GetEnvVar("CPP_LISTEN_PORT");  // 对应启动参数--cpp_listen_port
+  std::string cppListenPort = cpp::GetEnvVar("CPP_LISTEN_PORT");  // 对应启动参数--cpp_listen_port 通常为0
   if (cppListenPort.empty()) 
   {
     // 如果环境变量获取的端口为空，则赋为0
