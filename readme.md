@@ -6,6 +6,7 @@
 ![示例图片](image/demo.jpg)
 * 小程序版本配置勾选"自动发布OBS"即支持OBS环境
 ![示例图片](image/obs.jpg)
+* [示例小程序链接](https://appstore.huya.com/#/app/59ku7pqm)
 
 ## 2 运行平台
 * PC Windows环境 64bit 编译环境: cmake3.63+、vs2017+
