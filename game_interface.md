@@ -5,7 +5,9 @@
 * https://dev.huya.com/docs/miniapp/dev/sdk/
 
 ## 2 游戏调用或监听接口的功能及参数约定
-### 2.1 SendMessageToApplet
+
+### 2.1 游戏调用接口
+#### 2.1.1 SendMessageToApplet
 * 透传消息至小程序(小程序对应的hyExt.exe.onGameMessage可监听获取到该消息)
 * 传入参数的message对象中的数据结构，格式如下：
 
@@ -23,7 +25,7 @@ message json对象字段描述
 | - | - | - |
 | msg | String | 调用结果描述信息 |
 
-### 2.2 UpdateAnchorLayer
+#### 2.1.2 UpdateAnchorLayer
 * 更新主播端图层信息
 * 传入参数的message对象中的数据结构，格式如下：
   
@@ -56,7 +58,49 @@ message json对象字段描述
 | - | - | - |
 | msg | String | 调用结果描述信息 |
 
-### 2.3 OnAppletMessage
+#### 2.1.3 GetAnchorAllLayers
+* 获取主播端所有图层信息
+* 传入参数的message对象中的数据结构：无参可忽略或传空对象
+
+* 返回的message对象内容格式如下：
+
+message json对象字段描述
+
+| 字段 | 类型 | 说明 |
+| - | - | - |
+| layerList | 数组 | 图层列表 |
+
+* 其中每一项的格式如下：
+  
+| 字段 | 类型 | 说明 |
+| - | - | - |
+| id | String | Id |
+| type | Number | 类型 |
+| name | String | 名称 |
+| isVisible | Boolean | 是否可见 |
+| order | Number |  层级(0为最上层) |
+
+* type 表示图层类型(即图层图标类型)，取值如下：
+
+| 取值 | 说明 |
+| - | - |
+| 0 | UNKNOWN |
+| 1 | IMAGE |
+| 2 | COLOR |
+| 3 | SLIDESHOW |
+| 4 | AUDIO_INPUT |
+| 5 | AUDIO_OUTPUT |
+| 6 | DESKTOP_CAPTURE |
+| 7 | WINDOW_CAPTURE |
+| 8 | GAME_CAPTURE |
+| 9 | CAMERA |
+| 10 | TEXT |
+| 11 | MEDIA |
+| 12 | BROWSER |
+| 13 | CUSTOM |
+
+### 2.2 游戏监听消息(接口)
+#### 2.2.1 OnAppletMessage
 * Game监听小程序发来的消息(小程序对应的hyExt.exe.sendToGame可发送消息到该接口)
 * 传入参数的message对象中的数据结构，格式如下：
 
@@ -66,7 +110,7 @@ message json对象字段描述
 
 注：小程序hyExt.exe.sendToGame对应该消息中message值为该msg消息内容
 
-### 2.4 OnAnchorCanvasChange
+#### 2.2.2 OnAnchorCanvasChange
 * Game监听主播端的画布改变的消息
 * 传入参数的message对象中的数据结构，格式如下：
 
@@ -78,6 +122,31 @@ message json对象字段描述
 | height | Number | 画布分辨率高度 |
 
 注：当Game收到该消息时，若投屏图层需要同步布局，则可再次调用UpdateAnchorLayer更新各图层位置或大小
+
+#### 2.2.3 OnOperateLayer
+* Game监听主播端的图层操作消息
+* 传入参数的message对象中的数据结构，格式如下：
+
+| 字段 | 类型 | 取值说明 |
+| - | - | - |
+| type | Number | 图层操作类型 |
+| name | String | 图层名称 |
+
+* type取值：
+  
+| 取值 | 说明 |
+| - | - |
+| 0 | 添加 |
+| 1 | 删除 |
+| 2 | 显示 |
+| 3 | 隐藏 |
+| 4 | 锁定 |
+| 5 | 解锁 |
+| 6 | 被选 |
+| 7 | 失选 |
+| 8 | 编辑 |
+
+注：被选/失选(暂不支持)
 
 ## 3 小程序、游戏、主播端(Anchor)间交互参数约定说明
 ### 3.1 发送请求参数说明
@@ -112,6 +181,6 @@ message json对象字段描述
 | eventName | String | 对应请求时的回调函数名，比如请求UpdateAnchorLayer时，该应答名字将为UpdateAnchorLayer_Callback(即_Callback后缀) |
 | reqId | String | 对应请求时reqId |
 | res | Number | 返回错误码，0成功，非0失败(-1:参数错误 -2:未准备就绪 -3:其他错误) |
-| message | Object | 实际的数据内容(json对象，不同请求时或推送消息时对应的json结构)(当res为0时，message值才有效) |
+| message | Object | 实际的数据内容(json对象，不同请求时或推送消息时对应的json结构)(当res为0时，message值为对应应答描述结构，否则为含msg字段的字符串错误描述) |
 
 注：当event为推送消息时(即以On开头的事件)，如OnAppletMessage，该event将不带_Callback后缀且其值为OnAppletMessage，此外reqId为"0"，res为0
