@@ -79,7 +79,10 @@ message json对象字段描述
 | name | String | 名称 |
 | isVisible | Boolean | 是否可见 |
 | order | Number | 层级(0为最上层) |
-| layout | Object | 位置布局 |
+| x | Number | 相对画布左上角位置x坐标(像素为单位,可为负值) |
+| y | Number | 相对画布左上角位置y坐标(像素为单位,可为负值) |
+| width | Number | 相对画布的显示宽度(像素为单位) |
+| height | Number | 相对画布的显示高度(像素为单位) |
 
 * type 表示图层类型(即图层图标类型)，取值如下：
 
@@ -99,15 +102,6 @@ message json对象字段描述
 | 11 | MEDIA |
 | 12 | BROWSER |
 | 13 | CUSTOM |
-
-* layout 表示图层位置布局，各字段如下：
-
-| 字段 | 类型 | 说明 |
-| - | - | - |
-| x | Number | 相对画布左上角位置x坐标(像素为单位,可为负值) |
-| y | Number | 相对画布左上角位置y坐标(像素为单位,可为负值) |
-| width | Number | 相对画布的显示宽度(像素为单位) |
-| height | Number | 相对画布的显示高度(像素为单位) |
 
 ### 2.2 游戏监听消息(接口)
 #### 2.2.1 OnAppletMessage
