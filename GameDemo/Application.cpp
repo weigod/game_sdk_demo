@@ -363,17 +363,22 @@ int Application::ParseMessage(std::string jsonStr)
 
   if (eventName == "OnAppletMessage") //小程序发过来的消息
   {
-    auto msg = messageObj.get<std::string>();
-    m_logger->info("OnAppletMessage msg:{}", msg);
-    UpdateRecvEditMsg(msg);
+    if (messageObj.contains("msg")) {
+      auto msg = messageObj["msg"].get<std::string>();
+      m_logger->info("OnAppletMessage msg: {}", msg);
+      UpdateRecvEditMsg(msg);
+    }
   } 
   else if (eventName == "OnAnchorCanvasChange") //主播端的画布改变的消息
   {
+    bool sceneChanged = false;
     if (messageObj.contains("sceneChanged")) {
-      bool sceneChanged = messageObj["sceneChanged"].get<bool>();
+      sceneChanged = messageObj["sceneChanged"].get<bool>();
     }
+
+    int32_t layoutType = 0;
     if (messageObj.contains("layoutType")) {
-      int32_t layoutType = messageObj["layoutType"].get<int32_t>();
+      layoutType = messageObj["layoutType"].get<int32_t>();
     }
     if (messageObj.contains("width")) {
       m_resolutionWidth = messageObj["width"].get<int32_t>(); //开播预览分辨率(画布)分辨率改变
@@ -381,14 +386,34 @@ int Application::ParseMessage(std::string jsonStr)
     if (messageObj.contains("height")) {
       m_resolutionHeight = messageObj["height"].get<int32_t>(); //开播预览分辨率(画布)分辨率改变
     }
-  } 
+    m_logger->info("OnAnchorCanvasChange, scene changed: {}, layout type: {}, width: {}, height: {}",
+      sceneChanged, layoutType, m_resolutionWidth, m_resolutionHeight);
+  }
+  else if (eventName == "OnOperateLayer") //主播端的图层操作消息
+  {
+    int32_t type = 0;
+    if (messageObj.contains("type")) {
+      type = messageObj["type"].get<int32_t>();
+    }
+
+    std::string name;
+    if (messageObj.contains("name")) {
+      name = messageObj["name"].get<std::string>();
+    }
+    m_logger->info("OnOperateLayer, type: {}, name: {}", type, name);
+  }
   else if (eventName == "UpdateAnchorLayer_Callback")  // UpdateAnchorLayer请求的应答消息
   {
-    if (messageObj.contains("error_code")) {
-      int32_t errorCode = messageObj["error_code"].get<int32_t>();
+    if (messageObj.contains("msg")) {
+      auto msg = messageObj["msg"].get<std::string>();
+      m_logger->info("UpdateAnchorLayer_Callback msg: {}", msg);
     }
-    if (messageObj.contains("error_msg")) {
-      std::string errorMsg = messageObj["error_msg"].get<std::string>();
+  }
+  else if (eventName == "SendMessageToApplet_Callback")  // SendMessageToApplet请求的应答消息
+  {
+    if (messageObj.contains("msg")) {
+      auto msg = messageObj["msg"].get<std::string>();
+      m_logger->info("SendMessageToApplet_Callback msg: {}", msg);
     }
   }
   return 0;
