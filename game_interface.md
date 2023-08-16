@@ -138,6 +138,7 @@ message json对象字段描述
 
 | 字段 | 类型 | 说明 |
 | - | - | - |
+| layoutType| Number| 画布布局模板类型(值取：0/1/2,分别对应常规/横屏加高/竖屏)
 | width | Number | 画布分辨率宽度 |
 | height | Number | 画布分辨率高度 |
 
