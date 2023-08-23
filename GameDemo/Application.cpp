@@ -50,9 +50,6 @@ Application::Application()
 #ifdef WIN32
   timeBeginPeriod(1);
 #endif
-  //建议再带个时间戳，GameDemo为业务标签，自己改名字
-  m_streamName = "GameDemo-local-";
-  m_streamName.append(std::to_string(::GetCurrentProcessId()));
 }
 
 Application::~Application()
@@ -142,20 +139,22 @@ int Application::Init(int argc, char** argv)
     m_logger->info("custom_data_cb pipelineId: {}, custom_data_event customData: {}, streamUrl: {}, streamUUIDS: {}", 
       pipelineId, e->customData, e->streamUrl, e->streamUUIDS);
     Application *contxt = static_cast<Application *>(userData);
+    //解析streamUUIDS获取推流的目标流名，多路流就对应多个流名
+    contxt->OnRecvStreamUUIDS(e->streamUUIDS);
     contxt->OnRecvCustomData(e->customData);
   }, this);
 
-  // 设置事件回调
-  cpp_set_event_cb([](void* userData, const char* pipelineId, const cpp_event* e) {
-    m_logger->info("event_cb pipelineId: {}, cpp_event streamUUID: {}, streamUrl: {}", pipelineId, e->streamUUID, e->streamUrl);
-  }, this);
-
+  //注册接收业务通道状态回调//status： kConnected = 0, kDisconnected = 1, kHandShake = 2
+  //收到kHandShake = 2表示通道握手成功，可开始发送通道消息
+//   cpp_set_channel_status_cb([](void* userData, cpp_channel_status status) { 
+//     m_logger->info("recv channel status: {}", status);
+//   }, this);
   //注册接收业务通道消息回调，对应cpp_call_channel_msg用于发送业务通道消息
   cpp_set_channel_msg_cb([](void* userData, const char* msg, uint32_t len) { 
     Application* context = (Application*)userData;
     std::string message(msg, len);
     m_logger->info("recv channel msg: {}", message);
-    context->ParseMessage(message);
+    context->OnRecvChannelMsg(message);
   }, this);
 
   CreateHostWindow();
@@ -176,35 +175,32 @@ int Application::Run()
   return (int)msg.wParam;
 }
 
-void Application::OnRecvCustomData(const std::string& customData)
+void Application::OnRecvStreamUUIDS(const std::string& streamUUIDS) 
 {
-  m_logger->info("OnRecvCustomData start. customData: {}", customData);
-  //首次是从CustomData里解析获取主播端预览分辨率
-  try
-  {
-    auto jsonObj = nlohmann::json::parse(customData);
-    if (jsonObj.contains("custom_data")) {
-      auto customObj = jsonObj["custom_data"];
-      if (customObj.contains("out_stream"))
-      {
-        auto streamObj = customObj["out_stream"];
-        if (streamObj.contains("width")) {
-          m_resolutionWidth = streamObj["width"].get<int32_t>();//预览(画布)分辨率
-        }
-        if (streamObj.contains("height")) {
-          m_resolutionHeight = streamObj["height"].get<int32_t>();//预览(画布)分辨率
+  try {
+    auto jsonObj = nlohmann::json::parse(streamUUIDS);
+    if (jsonObj.contains("cpp_stream_uuids")) {
+      auto uuidsList = jsonObj["cpp_stream_uuids"];
+      if (uuidsList.is_array()) {
+        for (auto& v : uuidsList) {
+          m_streamNames.push_back(v.get<std::string>());
+          m_logger->info("OnParseStreamUUIDS streamname: {}", v.get<std::string>());
         }
       }
     }
-  }
-  catch (const std::exception& e)
-  {
+  } catch (const std::exception& e) {
     m_logger->error("parse customData failed with error:: {}", e.what());
   }
+
   if (!m_gameRenderThread) {
     SendBizMsg("UpdateAnchorLayer", BuildUpdateAnchorLayer());
     m_gameRenderThread = std::make_unique<std::thread>(&Application::GameRenderLoop, this);
   }
+}
+
+void Application::OnRecvCustomData(const std::string& customData)
+{
+  m_logger->info("OnRecvCustomData start. customData: {}", customData);
 }
 
 void Application::GameRenderLoop() 
@@ -257,7 +253,7 @@ void Application::GameRenderLoop()
     video_frame.pixelData = videoBuf.data();
     video_frame.pixelFormat = kPixel_Format_RGBA;
     video_frame.fps = 30;
-    cpp_pipeline_share_raw_jce(m_streamName.c_str(), &video_frame, nullptr, 0, nullptr);
+    cpp_pipeline_share_raw_jce(m_streamNames[0].c_str(), &video_frame, nullptr, 0, nullptr);
     //3、发送共享纹理句柄
     //cpp_pipeline_add_dx_texture_jce(m_streamName.c_str(), sharedHandle);
 
@@ -287,13 +283,17 @@ void Application::GameRenderLoop()
  */
 nlohmann::json Application::BuildUpdateAnchorLayer() {
   nlohmann::json innerEvent;
+  if (m_streamNames.size() <= 0) {
+    m_logger->info("BuildUpdateAnchorLayer m_streamNames is NULL");
+    return innerEvent;
+  }
   innerEvent["layerList"] = nlohmann::json::array();
   nlohmann::json item = {
       {"x", 0},
       {"y", 0},
       {"width", 1280},
       {"height", 720}, 
-      {"stream_name", m_streamName},
+      {"stream_name", m_streamNames[0]},
       /*{"opt_layer_name", u8"游戏Demo"},*///名字跟小程序名一致
       {"is_primary", true}};
   innerEvent["layerList"].push_back(item);
@@ -330,7 +330,7 @@ int Application::UnInit()
  * message Object 实际的数据内容(json对象，不同请求时或通告事件时对应的json应答结构)(当res为0时，message值才有效)
  * 注：当event为通告事件时(即以On开头的事件)，如OnAppletMessage，该event将不带_Callback后缀且其值为OnAppletMessage，此外reqId为0，res为0
  */
-int Application::ParseMessage(std::string jsonStr)
+int Application::OnRecvChannelMsg(std::string jsonStr)
 {
   if (jsonStr.empty())
   {
