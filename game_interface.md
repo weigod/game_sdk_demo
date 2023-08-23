@@ -31,7 +31,7 @@ message json对象字段描述
   
 | 字段 | 类型 | 说明 |
 | - | - | - |
-| layerList | 数组 | 投屏图层列表 |
+| layerList | Array | 投屏图层列表 |
 
 * 其中每一项图层信息的格式如下：
 
@@ -68,7 +68,7 @@ message json对象字段描述
 
 | 字段 | 类型 | 说明 |
 | - | - | - |
-| layerList | 数组 | 图层列表 |
+| layerList | Array | 图层列表 |
 
 * 其中每一项的格式如下：
   
@@ -102,6 +102,45 @@ message json对象字段描述
 | 11 | MEDIA |
 | 12 | BROWSER |
 | 13 | CUSTOM |
+
+#### 2.1.4 GetAnchorStatus
+* 获取主播端状态信息
+* 传入参数的message对象中的数据结构，格式如下：
+  
+| 字段 | 类型 | 说明 |
+| - | - | - |
+| key | String | 状态Key(LinkMic/PK/Live/PrivacyMode/...) |
+
+* 返回的message对象内容格式如下：
+
+message json对象字段描述
+
+| 字段 | 类型 | 说明 |
+| - | - | - |
+| status | String | 状态结果(默认为true/false，部分key可能为其他值) |
+
+* key 表示主播端状态key，取值如下：
+
+| 取值 | 说明 |
+| - | - |
+| LinkMic | 是否连麦 |
+| PK | 是否PK |
+| Live | 是否开播 |
+| PrivacyMode | 是否隐私模式 |
+
+#### 2.1.5 GetAnchorCanvas
+* 获取主播端画布信息
+* 传入参数的message对象中的数据结构：无参可忽略或传空对象
+
+* 返回的message对象内容格式如下：
+
+message json对象字段描述
+
+| 字段 | 类型 | 说明 |
+| - | - | - |
+| layoutType| Number| 画布布局模板类型(值取：0/1/2,分别对应常规/横屏加高/竖屏)
+| width | Number | 画布分辨率宽度 |
+| height | Number | 画布分辨率高度 |
 
 ### 2.2 游戏监听消息(接口)
 #### 2.2.1 OnAppletMessage
@@ -151,6 +190,17 @@ message json对象字段描述
 | 8 | 编辑 |
 
 注：被选/失选(暂不支持)
+
+#### 2.2.4 OnAnchorStatus
+* Game监听主播端的状态信息
+* 传入参数的message对象中的数据结构，格式如下：
+
+| 字段 | 类型 | 取值说明 |
+| - | - | - |
+| key | String | 状态Key(LinkMic/PK/Live/PrivacyMode/...) |
+| status | String | 状态结果(默认为true/false，部分key可能为其他值) |
+
+* key含义，见GetAnchorStatus说明
 
 ## 3 小程序、游戏、主播端(Anchor)间交互参数约定说明
 ### 3.1 发送请求参数说明
