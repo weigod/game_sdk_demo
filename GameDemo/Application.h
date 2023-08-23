@@ -32,6 +32,7 @@ public:
   int UnInit();
   int Run();
 
+  void OnRecvStreamUUIDS(const std::string& streamUUIDS);
   void OnRecvCustomData(const std::string& customData);
   void GameRenderLoop();
 
@@ -42,7 +43,7 @@ public:
   // 发送业务消息
   void SendBizMsg(const std::string& eventName, const nlohmann::json& event);
   // 用于解析业务通道消息
-  int ParseMessage(std::string jsonStr);
+  int OnRecvChannelMsg(std::string jsonStr);
 
 public:
   void CreateHostWindow();
@@ -60,7 +61,7 @@ private:
   std::string m_jobId;
   std::unique_ptr<std::thread> m_gameRenderThread;
   std::atomic<bool> m_exitFlag;
-  std::string m_streamName;//自定义一个流名，保持唯一性
+  std::vector<std::string> m_streamNames;//解析获取流名，如有多场景流则含"primary"代表主流名，流名用于cpp_pipeline_share_raw_jce等推送音视频数据接口参数，一条流对应主播端一个预览图层
   int32_t m_resolutionWidth = 1920;
   int32_t m_resolutionHeight = 1080;
 
