@@ -63,7 +63,7 @@ Application::~Application()
 int Application::Init(int argc, char** argv)
 {
   // 通过环境变量获取端口
-  std::string cppPort = cpp::GetEnvVar("CPP_PORT");//对应启动参数--cpp_port
+  std::string cppPort = cpp::GetEnvVar("CPP_PORT");
   if (cppPort.empty())
   {
     // 如果环境变量获取的端口为空，则赋为0
@@ -71,7 +71,7 @@ int Application::Init(int argc, char** argv)
   }
   m_thrifPort = std::stoll(cppPort);
 
-  std::string cppListenPort = cpp::GetEnvVar("CPP_LISTEN_PORT");  // 对应启动参数--cpp_listen_port 通常为0
+  std::string cppListenPort = cpp::GetEnvVar("CPP_LISTEN_PORT");
   if (cppListenPort.empty()) 
   {
     // 如果环境变量获取的端口为空，则赋为0
@@ -79,8 +79,8 @@ int Application::Init(int argc, char** argv)
   }
   m_thrifListenPort = std::stoll(cppListenPort);
 
-  m_jobId = cpp::GetEnvVar("CPP_JOB_ID");//对应启动参数--cpp_jobid
-  std::string logDir = cpp::GetEnvVar("LOCAL_LOG_DIR");//对应启动参数--local_log_dir
+  m_jobId = cpp::GetEnvVar("CPP_JOB_ID");
+  std::string logDir = cpp::GetEnvVar("LOCAL_LOG_DIR");
   fs::path logPath;
   if (!logDir.empty()) {
     logPath = fs::u8path(logDir);
