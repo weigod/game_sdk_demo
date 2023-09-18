@@ -14,7 +14,7 @@
 
 ## 3 基础玩法
 ### 3.1 初始化环境参数
-* 通过启动参数或环境变量获取cpp_jobid、cpp_port、cpp_listen_port、local_log_dir等必要参数
+* 通过环境变量获取cpp_jobid、cpp_port、cpp_listen_port、local_log_dir等必要参数
 ### 3.2 初始化SDK
 * 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化
 * 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率
