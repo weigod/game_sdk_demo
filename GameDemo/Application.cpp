@@ -427,7 +427,7 @@ LRESULT CALLBACK HostWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
   } break;
   case WM_DESTROY: {
     Application* context = (Application*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-    context->SendBizMsg("SendMessageToApplet", context->BuildSendMessageToApplet("GameExit"));
+    context->SendBizMsg("SendMessageToApplet", context->BuildSendMessageToApplet(R"(GameExit)"));
     KillTimer(hWnd, timerId);  // 销毁定时器
     PostQuitMessage(0);
   } break;
