@@ -39,6 +39,7 @@
 * 如本样例所示，本样例的输出为GameDemo.exe，发布时只需要把GameDemo.exe和游戏资源压缩成zip包，然后在小程序开放平台素材上传zip包获取url地址，最后在小程序里配置url地址
 * 开放平台文档: https://dev.huya.com/docs/miniapp/dev/sdk/
 * **注意: 本项目thirdparty下的所有SDK依赖，在发布的时候不需要进打包，会由主播端提供运行时环境！**
-## 6 其他接入方式
-* 请参考[弹幕游戏云启动玩法](https://github.com/weigod/game_cloud_demo)
+## 6 其他参考
+* [本项目关联的小程序](https://github.com/weigod/game_launcher_demo)
+* [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
 
