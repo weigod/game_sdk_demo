@@ -54,7 +54,35 @@ CPP_EXPORT int cpp_add_plugin_data(const char* jobId, const cpp_plguin_data* dat
 CPP_EXPORT int cpp_reset_dx_stream_pts(const char* streamUUID);
 CPP_EXPORT int cpp_reset_dx_stream_pts2(const char* jobId, const char* streamUUID);
 CPP_EXPORT int cpp_pipeline_stop(const char* jobId);
-
+// Deprecated 已废弃，不要使用
+CPP_EXPORT int cpp_pipeline_add_pcm(const char* streamUUID, const cpp_pcm_info* info, const uint8_t* srcData, uint32_t srcDataSize,
+                                    const int64_t* pts = nullptr);
+CPP_EXPORT int cpp_pipeline_add_raw(const char* streamUUID, const cpp_raw_video_frame* video_frame, const int64_t* captureStartTickMs = nullptr,
+                                    const int64_t* pts = nullptr);
+CPP_EXPORT int cpp_context_init(int32_t thriftPort, const char* jobId, const char* logDir);
+CPP_EXPORT int cpp_context_init2(int32_t thriftPort, const char* jobId, const char* logDir, int32_t thriftListenPort);
+CPP_EXPORT int cpp_pipeline_add_dx_texture(const char* streamUUID, uint64_t dxTextureHandle, const int64_t* pts = nullptr,
+                                           const int64_t* captureStartTickMs = nullptr, const int64_t* fps = nullptr);
+CPP_EXPORT int cpp_pipeline_add_texture(const char* streamUUID, void* context, void* texturePtr, int textureType = 0, const int64_t* pts = nullptr,
+                                        const int64_t* fps = nullptr);
+// Deprecated cpp_pipeline_share_pcm已废弃，不要使用
+CPP_EXPORT int cpp_pipeline_share_pcm(const char* streamUUID, const cpp_pcm_info* info, const uint8_t* srcData, uint32_t srcDataSize,
+                                      const int64_t* pts = nullptr);
+CPP_EXPORT int cpp_pipeline_share_raw(const char* streamUUID, const cpp_raw_video_frame* video_frame, const int64_t* captureStartTickMs = nullptr,
+                                      const int64_t* pts = nullptr);
+CPP_EXPORT int cpp_pipeline_add_pcm_jce(const char* streamUUID, const cpp_pcm_info* info, const uint8_t* srcData, uint32_t srcDataSize,
+                                        const int64_t* pts = nullptr, const char* customData = nullptr, uint32_t customDataSize = 0);
+CPP_EXPORT int cpp_pipeline_add_raw_jce(const char* streamUUID, const cpp_raw_video_frame* video_frame, const char* customData,
+                                        uint32_t customDataSize, const int64_t* pts = nullptr);
+CPP_EXPORT int cpp_remote_log(const char* text, int32_t len);
+typedef void(__stdcall* PFN_STREAM_LOG_CB)(void* userData, const char* pipelineId, cpp_event_log_level level, const char* logStr);
+CPP_EXPORT int cpp_set_log_cb(PFN_STREAM_LOG_CB cb, void* userData);
+typedef void(__stdcall* PFN_STREAM_AUDIODATA_CB)(void* userData, const char* pipelineId, const char* streamUUID, const cpp_pcm_info* raw,
+                                                 const uint8_t* data, uint32_t dataSize, int64_t pts);
+CPP_EXPORT int cpp_set_audio_data_cb(PFN_STREAM_AUDIODATA_CB cb, void* userData);
+typedef void(__stdcall* PFN_STREAM_VIDEODATA_CB)(void* userData, const char* pipelineId, const char* streamUUID, const cpp_raw_video_frame* raw,
+                                                 int64_t pts);
+CPP_EXPORT int cpp_set_video_data_cb(PFN_STREAM_VIDEODATA_CB cb, void* userData);
 #if defined(__cplusplus)
 }
 #endif

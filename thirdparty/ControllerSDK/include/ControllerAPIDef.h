@@ -45,7 +45,8 @@ struct cpp_event
 {
   uint64_t uid;
   const char* streamUrl;
-  const char* streamUUID;
+  const char* streamUUID;//简化处理推一路流的流名，加工程序调用cpp_pipeline_add_dx_texture_jce等函数对应的streamUUID参数
+  const char* streamUUIDS;//解析推多路流的流名(包含上面一路流)：{"cpp_stream_uuids":["67-20230822161513167-1099531783474-virtuallive-cloud-28060-metashell-primary-out-src","67-20230822161513167-1099531783474-virtuallive-cloud-28060-metashell-secondary-out-src"]}
   int32_t eventData;
   cpp_event_key eventKey;
 };
@@ -54,8 +55,8 @@ struct cpp_custom_data_event
 {
   uint64_t uid;
   const char* streamUrl;
-  const char* streamUUID;
-  const char* streamUUIDS;
+  const char* streamUUID;//简化处理推一路流的流名，加工程序调用cpp_pipeline_add_dx_texture_jce等函数对应的streamUUID参数
+  const char* streamUUIDS;//解析推多路流的流名(包含上面一路流)：{"cpp_stream_uuids":["67-20230822161513167-1099531783474-virtuallive-cloud-28060-metashell-primary-out-src","67-20230822161513167-1099531783474-virtuallive-cloud-28060-metashell-secondary-out-src"]}
   const char* customData;
 };
 
@@ -125,6 +126,13 @@ struct cpp_plugin_program_cfg
   const char* programName;
   int32_t sort;
   const char* instanceGUID;
+};
+
+enum cpp_channel_status
+{
+  kConnected = 0,
+  kDisconnected = 1,
+  kHandShake = 2,
 };
 
 struct cpp_flow_cfg

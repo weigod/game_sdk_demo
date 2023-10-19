@@ -4,6 +4,7 @@
 
 #include "iframework.h"
 #include "ControllerAPI.h"
+#include "ControllerDevAPI.h"
 
 ////////////////////////////////////////////////////////////////////////
 //! IMediapipelineApi
