@@ -40,6 +40,6 @@
 * 开放平台文档: https://dev.huya.com/docs/miniapp/dev/sdk/
 * **注意: 本项目thirdparty下的所有SDK依赖，在发布的时候不需要进打包，会由主播端提供运行时环境！**
 ## 6 其他参考
-* [本项目关联的小程序](https://github.com/weigod/game_launcher_demo)
+* [本示例关联的小程序](https://github.com/weigod/game_launcher_demo)
 * [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
 
