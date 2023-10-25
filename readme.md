@@ -42,4 +42,5 @@
 ## 6 其他参考
 * [本示例关联的小程序](https://github.com/weigod/game_launcher_demo)
 * [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
+* [开发者推荐Demo](https://github.com/huya-ext/hyext-examples/tree/master/examples/exe)
 
