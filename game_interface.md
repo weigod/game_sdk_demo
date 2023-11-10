@@ -109,7 +109,7 @@ message json对象字段描述
   
 | 字段 | 类型 | 说明 |
 | - | - | - |
-| key | String | 状态Key(LinkMic/PK/Live/PrivacyMode/...) |
+| typeName | String | 状态类型(LinkMic/PK/Live/PrivacyMode/...) |
 
 * 返回的message对象内容格式如下：
 
@@ -117,9 +117,9 @@ message json对象字段描述
 
 | 字段 | 类型 | 说明 |
 | - | - | - |
-| status | String | 状态结果(默认为true/false，部分key可能为其他值) |
+| state | String | 状态结果(默认为true/false，部分typeName可能为其他值) |
 
-* key 表示主播端状态key，取值如下：
+* typeName 表示主播端状态，取值如下：
 
 | 取值 | 说明 |
 | - | - |
@@ -197,10 +197,10 @@ message json对象字段描述
 
 | 字段 | 类型 | 取值说明 |
 | - | - | - |
-| key | String | 状态Key(LinkMic/PK/Live/PrivacyMode/...) |
-| status | String | 状态结果(默认为true/false，部分key可能为其他值) |
+| typeName | String | 状态类型(LinkMic/PK/Live/PrivacyMode/...) |
+| state | String | 状态结果(默认为true/false，部分typeName可能为其他值) |
 
-* key含义，见GetAnchorStatus说明
+* typeName含义，见GetAnchorStatus说明
 
 ## 3 小程序、游戏、主播端(Anchor)间交互参数约定说明
 ### 3.1 发送请求参数说明
