@@ -43,5 +43,5 @@
 * [本示例关联的小程序](https://github.com/weigod/game_launcher_demo)
 * [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
 * [官方推荐小程序Demo在这里](https://github.com/huya-ext/hyext-examples/tree/master/examples/exe)
-* [Unity C# Wrapper示例](C#_Wrapper/MediaPiplelineControllerSDK.cs)
+* [Unity C# Demo示例(见C#_Demo目录)](C#_Demo)
 
