@@ -44,4 +44,5 @@
 * [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
 * [官方推荐小程序Demo在这里](https://github.com/huya-ext/hyext-examples/tree/master/examples/exe)
 * [Unity C# Demo示例(见C#_Demo目录)](C#_Demo)
+* [开发小提示(开发小提示.png)]
 
