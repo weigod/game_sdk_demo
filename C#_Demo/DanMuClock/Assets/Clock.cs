@@ -17,6 +17,7 @@ public class NewBehaviourScript : MonoBehaviour
     public Button pkInviteOnBtn;
     public Button pkInviteOffBtn;
     public Button normalBusBtn;
+    public Button normalAppletBusBtn;
     public Text rspText;
 
     private Huya.USDK.MediaController.MediaPiplelineControllerSDK mediaControllerSDK; // 媒体控制SDK
@@ -41,6 +42,7 @@ public class NewBehaviourScript : MonoBehaviour
         pkInviteOnBtn.onClick.AddListener(OnPkInviteOnMessageListenMsg);
         pkInviteOffBtn.onClick.AddListener(OnPkInviteOffMessageListenMsg);
         normalBusBtn.onClick.AddListener(OnGetAnchorLiveStatus);
+        normalAppletBusBtn.onClick.AddListener(OnGetLiveInfo);
 
         // 模拟测试发送获取主播端画布消息
         InvokeRepeating("TestGetAnchorCanvasMsg", 3f, 5f);
@@ -168,13 +170,29 @@ public class NewBehaviourScript : MonoBehaviour
         reqIdIndex++;
     }
 
+    // 通过小程序获取主播直播信息
+    public void OnGetLiveInfo()
+    {
+        var appletApiName = "hyExt.context.getLiveInfo";
+        var reqId = appletApiName + "_" + reqIdIndex.ToString();
+
+        JsonData appletApiParamjsonData = new JsonData();
+        appletApiParamjsonData.SetJsonType(JsonType.Object); // 空json对象时(空参)，此设置是必要的
+        var appletApiParamStr = appletApiParamjsonData.ToJson();
+
+        List<string> appletApiParamArray = new List<string>();
+        appletApiParamArray.Add(appletApiParamStr);
+
+        mediaControllerSDK.SendAppletInvokeReqMsg(appletApiName, appletApiParamArray, reqId);
+    }
+
     // 模拟发送获取主播端画布信息
     public void TestGetAnchorCanvasMsg()
     {
         var eventName = "GetAnchorCanvas";
         var reqId = eventName + "_" + reqIdIndex.ToString();
         JsonData messageJsonData = new JsonData();
-        messageJsonData.SetJsonType(JsonType.Object);
+        messageJsonData.SetJsonType(JsonType.Object); // 空json对象时(空参)，此设置是必要的
         mediaControllerSDK.SendGeneralMsg(eventName, reqId, messageJsonData);
         reqIdIndex++;
     }
@@ -295,6 +313,11 @@ public class NewBehaviourScript : MonoBehaviour
                 rspText.text = "pk invite listen off failed, rsp error: " + err;
             }
         }
+        else if(apiName == "hyExt.context.getLiveInfo")
+        {
+            Debug.Log("get live info rsp: " + rsp + ", reqId: " + reqId);
+            rspText.text = "get live info rsp msg: " + rsp;
+        }
         else // 其他invoke调用应答
         {
 
@@ -307,8 +330,8 @@ public class NewBehaviourScript : MonoBehaviour
         // TODO: 业务侧自行处理小程序invoke listen 监听通告
         if (apiName == "hyExt.pk.onInviteMessage")
         {
-            Debug.Log("get pk invite on message: " + message + ", cbId: " + cbId);
-            rspText.text = "listen pk invite on msg: " + message;
+            Debug.Log("get pk invite message: " + message + ", cbId: " + cbId);
+            rspText.text = "pk invite msg: " + message;
 
             // message转json后，取PkNotice各字段值即可
             // 参考文档：https://dev.huya.com/docs/miniapp/danmugame/open/1v1/hy-ext-pk-on-invite-message/
@@ -322,7 +345,7 @@ public class NewBehaviourScript : MonoBehaviour
         else if (apiName == "hyExt.pk.offInviteMessage")
         {
             Debug.Log("get pk invite off message: " + message + ", cbId: " + cbId);
-            rspText.text = "listen pk invite off msg: " + message;
+            rspText.text = "pk invite msg: " + message;
         }
         else // 其他invoke监听通告
         {
