@@ -28,6 +28,14 @@ extern "C"
 **/
 CPP_EXPORT int cpp_context_init3(int32_t thriftPort, const char* jobId, const char* logDir, int32_t thriftListenPort, bool enableDumpCapture);
 
+/**  
+   * sdk自动从获取了环境变量CPP_PORT，CPP_JOB_ID，LOCAL_LOG_DIR
+   * 等同于调了cpp_context_init3(CPP_PORT, CPP_JOB_ID, LOCAL_LOG_DIR, 0, false)
+**
+@return 0 初始化成功
+**/
+CPP_EXPORT int cpp_context_init_ex();
+
 /*
 @brief 反初始化媒体控制SDK
 */
@@ -138,6 +146,7 @@ CPP_EXPORT int cpp_set_video_data_cb2(PFN_STREAM_VIDEODATA_CB2 cb, void* userDat
 /**
  * @brief 发送业务数据(端云都调此接口)
  * @sendBuf 业务数据
+ * @return 0 表示成功
  */
 CPP_EXPORT int cpp_call_channel_msg(const char* sendBuf, uint32_t sendBufLen);
 
