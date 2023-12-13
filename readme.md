@@ -16,7 +16,7 @@
 ### 3.1 初始化环境参数
 * 通过环境变量获取cpp_jobid、cpp_port、cpp_listen_port、local_log_dir等必要参数
 ### 3.2 初始化SDK
-* 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化
+* 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化(可调用cpp_context_init_ex接口替代调用，可省去3.1的取环境参数的步骤)
 * 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率
 * 调用cpp_set_channel_msg_cb注册回调, 用于监听小程序和主播端的消息
 * SDK接口参数请参照thirdparty/ControllerSDK/include/ControllerAPI.h
@@ -43,6 +43,6 @@
 * [本示例关联的小程序](https://github.com/weigod/game_launcher_demo)
 * [弹幕玩法云启动全流程介绍](https://dev.huya.com/docs/miniapp/danmugame/intro/)
 * [官方推荐小程序Demo在这里](https://github.com/huya-ext/hyext-examples/tree/master/examples/exe)
-* [Unity C# Demo示例(见C#_Demo目录)](C#_Demo)
-* [开发小提示(开发小提示.png)]
+* [Unity C# Demo示例](https://github.com/weigod/game_unity_demo)
+* [开发小提示)](image/develop_tip.png)
 
