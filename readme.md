@@ -38,6 +38,7 @@
 ## 5 发布部署
 * 如本样例所示，本样例的输出为GameDemo.exe，发布时只需要把GameDemo.exe和游戏资源压缩成zip包，然后在小程序开放平台素材上传zip包获取url地址，最后在小程序里配置url地址
 * 开放平台文档: https://dev.huya.com/docs/miniapp/dev/sdk/
+* 构建包可执行文件和依赖库等建议均数字签名，避免被杀毒/防火墙或其他安全软件阻止或误删除文件，导致无法正常启动或运行
 * **注意: 本项目thirdparty下的所有SDK依赖，在发布的时候不需要进打包，会由主播端提供运行时环境！**
 ## 6 其他参考
 * [本示例关联的小程序](https://github.com/weigod/game_launcher_demo)
