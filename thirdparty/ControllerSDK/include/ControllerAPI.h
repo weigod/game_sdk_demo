@@ -24,12 +24,12 @@ extern "C"
 @param logDir: 日志文件写出的目录, 如果为null，则使用"当前模块目录/../logs/", //对应环境变量LOCAL_LOG_DIR
 @param thriftListenPort: 反向监听端口，除了调试模式外其他场景都填0
 @param enableDumpCapture: true: 启用sdk的dump捕获能力，false: 不启用
-@return 0 初始化成功
+@return 0 初始化成功 
 **/
 CPP_EXPORT int cpp_context_init3(int32_t thriftPort, const char* jobId, const char* logDir, int32_t thriftListenPort, bool enableDumpCapture);
 
 /**  
-   * sdk自动从获取了环境变量CPP_PORT，CPP_JOB_ID，LOCAL_LOG_DIR
+   * sdk自动获取了环境变量CPP_PORT，CPP_JOB_ID，LOCAL_LOG_DIR
    * 等同于调了cpp_context_init3(CPP_PORT, CPP_JOB_ID, LOCAL_LOG_DIR, 0, false)
 **
 @return 0 初始化成功
