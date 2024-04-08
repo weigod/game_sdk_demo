@@ -13,11 +13,9 @@
 * 体验Demo:复制thirdparty/ControllerSDK/bin/win64的所有依赖文件到bin目录，运行GameDemo.exe
 
 ## 3 基础玩法
-### 3.1 初始化环境参数
-* 通过环境变量获取cpp_jobid、cpp_port、cpp_listen_port、local_log_dir等必要参数
-### 3.2 初始化SDK
-* 调用cpp_context_init3(cpp_jobid, cpp_jobid, local_log_dir, cpp_listen_port, false); 完成初始化(注：可调用cpp_context_init_ex接口替代调用，可省去3.1的取环境参数的步骤)
-* 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率
+### 3.1 初始化SDK
+* 调用cpp_context_init_ex完成初始化
+* 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率(横竖屏)
 * 调用cpp_set_channel_msg_cb注册回调, 用于监听小程序和主播端的消息
 * SDK接口参数请参照thirdparty/ControllerSDK/include/ControllerAPI.h
 ### 3.3 采集游戏图像发送

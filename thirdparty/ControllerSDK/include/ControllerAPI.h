@@ -42,15 +42,20 @@ CPP_EXPORT int cpp_context_init_ex();
 CPP_EXPORT void cpp_context_uninit();
 
 /**
+ * @brief 获取运行环境 返回:0本地 1云端
+ */
+CPP_EXPORT int cpp_get_env();
+
+/**
  * @brief 启用SDK的崩溃捕获,cpp_context_init3 enableDumpCapture: true
  * @dumpDir 崩溃产生的路径，要求utf8
  */
-CPP_EXPORT int32_t cpp_dump_start(const char* dumpDir);
+CPP_EXPORT int cpp_dump_start(const char* dumpDir);
 
 /**
  * @brief 停用SDK的崩溃捕获
  */
-CPP_EXPORT int32_t cpp_dump_stop();
+CPP_EXPORT int cpp_dump_stop();
 
 /*
 @brief 发送共享纹理(已兼容多显卡实现)
