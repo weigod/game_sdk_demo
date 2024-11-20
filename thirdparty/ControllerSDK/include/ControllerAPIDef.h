@@ -64,11 +64,11 @@ enum cpp_stream_type
 {
   kStreamType_Huya = 0, 
   kStreamType_Rtmp = 1,
-  kStreamType_FlvFile = 2,  //本地flv文件
-  kStreamType_Mp4File = 3,  //本地mp4文件
-  kStreamType_Dx = 6,
-  kStreamType_Camera = 11,
-  kStreamType_EncoderOnly = 17,
+  kStreamType_Hls = 2,
+  kStreamType_FlvFile = 3,  //本地flv文件
+  kStreamType_Mp4File = 4,  //本地mp4文件
+  kStreamType_Dx = 7,
+  kStreamType_Camera = 12,
   kStreamType_Max = 255
 };
 
