@@ -24,14 +24,17 @@ enum PixelFormat
   kPixelFormat_BGRA = 1,
   kPixelFormat_RGB24 = 2,
   kPixelFormat_RGBA = 3,
-  // B10G10R10A2
-  kPixelFormat_30RA = 4,
+  // B10G10R10A2(用不上)
+  kPixelFormat_BGRA30 = 4, 
   // R10G10B10A2
-  kPixelFormat_30BA = 5,
+  kPixelFormat_RGBA30 = 5,
   kPixelFormat_NV12 = 6,
   kPixelFormat_NV21 = 7,
   kPixelFormat_YUV420 = 8,
   kPixelFormat_RAW = 9,//裸数据透传
+  kPixelFormat_BGRA_UNORM = 10,  // DXGI_FORMAT_B8G8R8A8_UNORM
+  kPixelFormat_RGBA_UNORM = 11,  // DXGI_FORMAT_R8G8B8A8_UNORM
+  kPixelFormat_BGRX = 12,        // DXGI_FORMAT_B8G8R8X8_UNORM
   kPixelFormat_Count,
   kPixelFormat_Max = 255
 };

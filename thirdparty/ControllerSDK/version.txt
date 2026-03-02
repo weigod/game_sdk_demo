@@ -1,4 +1,4 @@
-mediapipelineserver version:1.0.0.4657 
-mediapipelineserver commitId:55377d87ca58812c19dac70447e52fc66dadac85 
-thirdparty commitid:acb6e7a5570968fee386086a5c21413b7ac124aa 
+mediapipelineserver version:1.0.0.4690 
+mediapipelineserver commitId:fe92d9114207351ef9e7dc05a609cc5e205d0af3 
+thirdparty commitid:bba851e7372db5f6f36568a224d08435cf7683b1 
 branch:HEAD 

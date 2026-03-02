@@ -69,6 +69,9 @@ enum cpp_stream_type
   kStreamType_Mp4File = 4,  //本地mp4文件
   kStreamType_Dx = 7,
   kStreamType_Camera = 12,
+  kStreamType_Desktop = 18,
+  kStreamType_ProcessInject = 19,
+  kStreamType_WindowCapture = 20,
   kStreamType_Max = 255
 };
 
