@@ -18,7 +18,7 @@
 * 调用cpp_set_custom_data_cb注册回调，解析CustomData获取主播端预览分辨率(横竖屏)
 * 调用cpp_set_channel_msg_cb注册回调, 用于监听小程序和主播端的消息
 * SDK接口参数请参照thirdparty/ControllerSDK/include/ControllerAPI.h
-### 3.3 采集游戏图像发送
+### 3.3 采集游戏图像发送(可选，如果没有特殊推流需求，正常运行游戏，云端会采集游戏画面)
 * 生成一个流名（可自定义唯一即可），调用UpdateAnchorLayer绑定流名和图层名
 * 调用sdk发送流接口发送游戏图像，支持三种数据发送:
 * cpp_pipeline_add_texture_jce 发送D3D11Resource纹理对象(推荐)
@@ -28,7 +28,7 @@
 * 通过cpp_call_channel_msg发送业务消息
 * 解析业务消息实现互动
 * [业务消息接口文档](game_interface.md)
-## 4 进阶玩法
+## 4 进阶玩法(可选，如果没有特殊推流需求，正常运行游戏，云端会采集游戏画面)
 ### 4.1 多图层投射
 * 举例游戏里调用了cpp_pipeline_add_texture_jce发送了两个场景图像:对应流名streamUUID为GameDemo-local-13310-1, GameDemo-local-13310-2; 
 * 调用UpdateAnchorLayer，参数layerList[0]设置stream_name:"GameDemo-local-13310-1"，opt_layer_name:"游戏Demo"，参数layerList[1]设置stream_name:"GameDemo-local-13310-2"，opt_layer_name:"游戏Demo#场景1"，这样就会在主播端展示两个图层，其中"游戏Demo"为主要图层，"游戏Demo#场景1"为子图层
